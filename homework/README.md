@@ -1,3 +1,3 @@
-`*.zip` files are all officially released versions of homework. (Actually I spend some time collecting them together).
+`*.zip` files are all final offcial releases. (Actually I spent some time collecting them together to make sure they are the last versions of homework).
 
-`hw*/` directories are my implementations.
+My implementations are under `hw*/` directories for reference.
