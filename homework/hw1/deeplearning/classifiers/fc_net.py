@@ -45,7 +45,10 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W1' and 'b1' and second layer weights #
         # and biases using the keys 'W2' and 'b2'.                                 #
         ############################################################################
-        pass
+        self.params['W1']=np.random.normal(loc=0, scale=weight_scale, size=(input_dim, hidden_dim))
+        self.params['W2']=np.random.normal(loc=0, scale=weight_scale, size=(hidden_dim, num_classes))
+        self.params['b1']=np.zeros(shape=hidden_dim)
+        self.params['b2']=np.zeros(shape=num_classes)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -74,7 +77,11 @@ class TwoLayerNet(object):
         # TODO: Implement the forward pass for the two-layer net, computing the    #
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
-        pass
+        X=X.reshape(X.shape[0],-1)
+        z1, (fc1_cache, relu1_cache) = affine_relu_forward(X, self.params['W1'], self.params['b1'])
+        z2, fc2_cache = affine_forward(z1, self.params['W2'], self.params['b2'])
+        scores = z2
+        ## I'm not sure socres refer to z2 or z2 after softmax
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -95,7 +102,23 @@ class TwoLayerNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-        pass
+        loss, dz2 = softmax_loss(z2, y)
+        dz1, grads['W2'], grads['b2'] = affine_backward(dout=dz2, cache=fc2_cache)
+        dx, grads['W1'], grads['b1'] = affine_relu_backward(dout=dz1, cache=(fc1_cache, relu1_cache))
+        
+        regularizer = 0.5*(
+            np.sum(self.params['W1']**2)+np.sum(self.params['W2']**2)
+        )
+        loss += self.reg * regularizer
+        grads['W1'] += self.reg * self.params['W1']
+        grads['W2'] += self.reg * self.params['W2']
+        
+        # Overfitting usually requires the output of the model to be sensitive to 
+        # small changes in the input data (i.e. to exactly interpolate the target 
+        # values, you tend to need a lot of curvature in the fitted function). 
+        # The bias parameters don’t contribute to the curvature of the model, so 
+        # there is usually little point in regularising them as well.
+        
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################

@@ -24,7 +24,7 @@ def affine_forward(x, w, b):
     # TODO: Implement the affine forward pass. Store the result in out. You     #
     # will need to reshape the input into rows.                                 #
     #############################################################################
-    pass
+    out = x.reshape(x.shape[0], -1).dot(w) + b ## each vector in x.dot(w) plus b
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -52,7 +52,9 @@ def affine_backward(dout, cache):
     #############################################################################
     # TODO: Implement the affine backward pass.                                 #
     #############################################################################
-    pass
+    dx = dout.dot(w.T).reshape(x.shape)
+    dw = x.reshape(x.shape[0], -1).T.dot(dout)
+    db = dout.sum(axis=0)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -74,7 +76,7 @@ def relu_forward(x):
     #############################################################################
     # TODO: Implement the ReLU forward pass.                                    #
     #############################################################################
-    pass
+    out = x * (x>0)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -97,7 +99,7 @@ def relu_backward(dout, cache):
     #############################################################################
     # TODO: Implement the ReLU backward pass.                                   #
     #############################################################################
-    pass
+    dx = dout * (x>0)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -498,7 +500,7 @@ def spatial_batchnorm_backward(dout, cache):
     return dx, dgamma, dbeta
 
 
-def svm_loss(x, y):
+def svm_loss(x, y): ## loss_j = max(0, 1 + score_j - score_true_j ) if j != true_j else 0
     """
     Computes the loss and gradient using for multiclass SVM classification.
 
@@ -513,14 +515,14 @@ def svm_loss(x, y):
     - dx: Gradient of the loss with respect to x
     """
     N = x.shape[0]
-    correct_class_scores = x[np.arange(N), y]
-    margins = np.maximum(0, x - correct_class_scores[:, np.newaxis] + 1.0)
+    correct_class_scores = x[np.arange(N), y]                               ## soft_threshold = correct_class_score - 1
+    margins = np.maximum(0, x - correct_class_scores[:, np.newaxis] + 1.0)  ## if wrong_class_score > soft_threshold, then it counts in loss
     margins[np.arange(N), y] = 0
     loss = np.sum(margins) / N
-    num_pos = np.sum(margins > 0, axis=1)
+    num_pos = np.sum(margins > 0, axis=1)   ## no. of wrong_class_scores higher than soft_threshold
     dx = np.zeros_like(x)
     dx[margins > 0] = 1
-    dx[np.arange(N), y] -= num_pos
+    dx[np.arange(N), y] -= num_pos ## the derivative for true class is how many times it occurs in counted wrong_class_scores
     dx /= N
     return loss, dx
 

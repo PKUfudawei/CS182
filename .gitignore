@@ -31,10 +31,13 @@ Temporary Items
 
 # Compiled Python files
 *.pyc
+*.pyx
 __pychache__/
 
 # Compiled C++ files
 *.out
+build/
+*.so
 
 # Application specific files
 venv
