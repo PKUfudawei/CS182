@@ -103,7 +103,8 @@ def rmsprop(x, dx, config=None):
     #############################################################################
     s = config['cache']
     config['cache'] = s = config['decay_rate']*s + (1-config['decay_rate'])*(dx**2)
-    x -= config['learning_rate'] * dx / (np.sqrt(s)+config['epsilon'])
+    x -= config['learning_rate'] * dx / (np.sqrt(s+config['epsilon']))
+    ## including epsilon in np.sqrt() has less error than excluding that
     next_x = x
     #############################################################################
     #                             END OF YOUR CODE                              #
@@ -146,7 +147,7 @@ def adam(x, dx, config=None):
     config['v'] = v = config['beta2']*config['v'] + (1-config['beta2'])*(dx**2)
     m_hat = m/(1 - config['beta1']**t)
     v_hat = v/(1 - config['beta2']**t)
-    x -= config['learning_rate'] * m_hat / (np.sqrt(v_hat)+config['epsilon'])
+    x -= config['learning_rate'] * m_hat / np.sqrt(v_hat+config['epsilon'])
     next_x = x
     #############################################################################
     #                             END OF YOUR CODE                              #
