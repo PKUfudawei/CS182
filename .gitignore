@@ -57,3 +57,6 @@ node_modules
 
 # cython
 *cython*
+
+# dataset
+datasets/

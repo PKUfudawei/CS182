@@ -77,7 +77,9 @@ def relu_forward(x):
     #############################################################################
     # TODO: Implement the ReLU forward pass.                                    #
     #############################################################################
-    out = x * (x>0)
+    out = np.maximum(x, 0)
+    # out=np.where(x<0, 0, x)
+    # out = x * (x>0)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -677,11 +679,14 @@ def softmax_loss(x, y):
     - loss: Scalar giving the loss
     - dx: Gradient of the loss with respect to x
     """
-    probs = np.exp(x - np.max(x, axis=1, keepdims=True))
-    probs /= np.sum(probs, axis=1, keepdims=True)
+    relative = x - np.max(x, axis=1, keepdims=True)
+    exp = np.exp(relative)
+    sum_exp = np.sum(exp, axis=1,keepdims=True)
+    prob = exp/sum_exp
+    log_prob = relative - np.log(sum_exp)
     N = x.shape[0]
-    loss = -np.sum(np.log(probs[np.arange(N), y])) / N
-    dx = probs.copy()
-    dx[np.arange(N), y] -= 1
+    loss = -np.sum(log_prob[np.arange(N), y]) / N   ## sum over (x[i], y[i])
+    dx = prob.copy()
+    dx[np.arange(N), y] -= 1 ## by math
     dx /= N
     return loss, dx
