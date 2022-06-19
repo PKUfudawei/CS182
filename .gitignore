@@ -58,6 +58,5 @@ node_modules
 # cython
 *cython*
 
-# dataset
-datasets/
-!datasets/*.sh
+# datasets
+/homework/hw1/datasets
