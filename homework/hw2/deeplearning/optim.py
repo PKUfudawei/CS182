@@ -44,6 +44,75 @@ def sgd(w, dw, config=None):
     return w, config
 
 
+def sgd_momentum(w, dw, config=None):
+    """
+    Performs stochastic gradient descent with momentum.
+
+    config format:
+    - learning_rate: Scalar learning rate.
+    - momentum: Scalar between 0 and 1 giving the momentum value.
+      Setting momentum = 0 reduces to sgd.
+    - velocity: A numpy array of the same shape as w and dw used to store a moving
+      average of the gradients.
+    """
+    if config is None: config = {}
+    config.setdefault('learning_rate', 1e-2)
+    config.setdefault('momentum', 0.9)
+    v = config.get('velocity', np.zeros_like(w))
+
+    next_w = None
+    #############################################################################
+    # TODO: Implement the momentum update formula as given in lecture. Store    #
+    # the updated value in the next_w variable. You should also use and update  #
+    # the velocity v.                                                           # 
+    #############################################################################
+    v = config['momentum'] * v + dw
+    w -= config['learning_rate'] * v    ## For efficiency, mutating w and
+    next_w = w                          ## setting next_w equal to w
+    #############################################################################
+    #                             END OF YOUR CODE                              #
+    #############################################################################
+    config['velocity'] = v
+
+    return next_w, config
+
+
+def rmsprop(x, dx, config=None):
+    """
+    Uses the RMSProp update rule, which uses a moving average of squared gradient
+    values to set adaptive per-parameter learning rates.
+
+    config format:
+    - learning_rate: Scalar learning rate.
+    - decay_rate: Scalar between 0 and 1 giving the decay rate for the squared
+      gradient cache.
+    - epsilon: Small scalar used for smoothing to avoid dividing by zero.
+    - cache: Moving average of second moments of gradients.
+    """
+    if config is None: config = {}
+    config.setdefault('learning_rate', 1e-2)
+    config.setdefault('decay_rate', 0.99)
+    config.setdefault('epsilon', 1e-8)
+    config.setdefault('cache', np.zeros_like(x))
+
+    next_x = None
+    #############################################################################
+    # TODO: Implement the RMSprop update formula, storing the next value of x   #
+    # in the next_x variable. Don't forget to update cache value stored in      #
+    # config['cache'] and to use the epsilon scalar to avoid dividing by zero.  #
+    #############################################################################
+    s = config['cache']
+    config['cache'] = s = config['decay_rate']*s + (1-config['decay_rate'])*(dx**2)
+    x -= config['learning_rate'] * dx / (np.sqrt(s+config['epsilon']))
+    ## including epsilon in np.sqrt() has less error than excluding that
+    next_x = x
+    #############################################################################
+    #                             END OF YOUR CODE                              #
+    #############################################################################
+
+    return next_x, config
+
+
 def adam(x, dx, config=None):
     """
     Uses the Adam update rule, which incorporates moving averages of both the
@@ -68,16 +137,20 @@ def adam(x, dx, config=None):
     config.setdefault('t', 0)
 
     next_x = None
-    beta1, beta2, eps = config['beta1'], config['beta2'], config['epsilon']
-    t, m, v = config['t'], config['m'], config['v']
-    m = beta1 * m + (1 - beta1) * dx
-    v = beta2 * v + (1 - beta2) * (dx * dx)
-    t += 1
-    alpha = config['learning_rate'] * np.sqrt(1 - beta2 ** t) / (1 - beta1 ** t)
-    x -= alpha * (m / (np.sqrt(v) + eps))
-    config['t'] = t
-    config['m'] = m
-    config['v'] = v
+    #############################################################################
+    # TODO: Implement the Adam update formula, storing the next value of x in   #
+    # the next_x variable. Don't forget to update the m, v, and t variables     #
+    # stored in config and to use the epsilon scalar to avoid dividing by zero. #
+    #############################################################################
+    t = config['t'] = config['t']+1
+    config['m'] = m = config['beta1']*config['m'] + (1-config['beta1'])*dx
+    config['v'] = v = config['beta2']*config['v'] + (1-config['beta2'])*(dx**2)
+    m_hat = m/(1 - config['beta1']**t)
+    v_hat = v/(1 - config['beta2']**t)
+    x -= config['learning_rate'] * m_hat / np.sqrt(v_hat+config['epsilon'])
     next_x = x
+    #############################################################################
+    #                             END OF YOUR CODE                              #
+    #############################################################################
 
     return next_x, config

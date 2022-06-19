@@ -1,6 +1,4 @@
 name: cs182_hw2
-channels:
-    - https://conda.anaconda.org/pytorch
 dependencies:
     - python=3.7
     - pip=20.3.3
