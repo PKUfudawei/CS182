@@ -59,4 +59,4 @@ node_modules
 *cython*
 
 # datasets
-/homework/hw1/datasets
+datasets/
