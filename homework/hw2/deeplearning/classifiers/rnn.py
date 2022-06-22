@@ -220,18 +220,18 @@ class CaptioningRNN(object):
         # functions; you'll need to call rnn_step_forward or lstm_step_forward in #
         # a loop.                                                                 #
         ###########################################################################
-        h0 = features.dot(W_proj) + b_proj                  # h0: (N, H)
+        next_h = features.dot(W_proj) + b_proj                  # h0: (N, H)
         V, W = W_embed.shape
         x = [W_embed[self._start] for _ in range(N)]        # x: (N, W)
-        for i in range(max_length):
+        for t in range(max_length):
             if self.cell_type=='rnn':
-                next_h, _ = rnn_step_forward(x, h0, Wx, Wh, b)  # next_h: (N, H)
+                next_h, _ = rnn_step_forward(x, next_h, Wx, Wh, b)  # next_h: (N, H)
             else:
-                pass
+                if t==0: next_c = np.zeros_like(next_h) ## if 'next_c' not in dir()
+                next_h, next_c, _ = lstm_step_forward(x, next_h, next_c, Wx, Wh, b)
             out = next_h.dot(W_vocab)                       # out: (N, V)
-            max_indices = np.argmax(out, axis=1)            # max_indices: (N,)
-            captions[:, i] = max_indices
-            x = W_embed[max_indices]                        # x: (N, W)
+            captions[:, t] = np.argmax(out, axis=1)            # max_indices: (N,)
+            x = W_embed[captions[:, t]]                        # x: (N, W)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
