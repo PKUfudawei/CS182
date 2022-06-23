@@ -31,7 +31,11 @@ def compute_saliency_maps(X, y, model):
     # to each input image. You first want to compute the loss over the correct   #
     # scores, and then compute the gradients with torch.autograd.gard.           #
     ##############################################################################
-    pass
+    scores = model(X)
+    truth_scores = scores.gather(1, y.view(-1, 1)).squeeze()
+    truth_scores.backward(gradient=torch.ones_like(truth_scores))
+    abs_dx = np.abs(X.grad)
+    saliency, _ = torch.max(abs_dx, dim=1) ## max on color channel
     ##############################################################################
     #                             END OF YOUR CODE                               #
     ##############################################################################
@@ -69,7 +73,17 @@ def make_fooling_image(X, target_y, model):
     # in fewer than 100 iterations of gradient ascent.                           #
     # You can print your progress over iterations to check your algorithm.       #
     ##############################################################################
-    pass
+    scores = model(X_fooling)       ## scores: (N, classes)
+    while scores.argmax(axis=1)!=target_y:
+        target_score = scores[:, target_y]
+        target_score.backward(gradient=torch.ones_like(target_score))
+        with torch.no_grad():
+            g = X_fooling.grad
+            X_fooling += learning_rate*g/torch.norm(g, p=2)
+        ## new forward pass
+        X_fooling.grad.data.zero_() ## avoid to accumulate gradients with old ones
+        #model.zero_grad() is also OK 
+        scores = model(X_fooling)
     ##############################################################################
     #                             END OF YOUR CODE                               #
     ##############################################################################
@@ -98,7 +112,13 @@ def update_class_visulization(model, target_y, l2_reg, learning_rate, img):
     # L2 regularization term!                                              #
     # Be very careful about the signs of elements in your code.            #
     ########################################################################
-    pass
+    scores = model(img)
+    target_score = scores[:, target_y]
+    reward = target_score - l2_reg*(img**2).sum()
+    reward.backward(gradient=torch.ones_like(reward))
+    with torch.no_grad():
+        g=img.grad
+        img += learning_rate*g ## if /torch.norm(g, p=2), generated image will be smoother and smeared
     ########################################################################
     #                             END OF YOUR CODE                         #
     ########################################################################
