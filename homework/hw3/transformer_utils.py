@@ -5,7 +5,7 @@ import torch as th
 from torch import nn
 import numpy as np
 
-device = th.device('cpu')
+device = th.device("cuda" if th.cuda.is_available() else "cpu")
 def get_device():
     return device
 def set_device(new_device):
