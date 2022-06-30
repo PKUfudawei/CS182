@@ -2,6 +2,8 @@ import torch as th
 from torch import nn
 from torch.nn import functional as F
 
+th.set_default_dtype(th.float64)
+
 class AttentionLayerLoss(nn.Module):
   """
   Computes the difference between teacher and student attention output.
