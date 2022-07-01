@@ -60,3 +60,4 @@ node_modules
 
 # datasets
 datasets/
+homework/hw3/bert_models/*.pt
