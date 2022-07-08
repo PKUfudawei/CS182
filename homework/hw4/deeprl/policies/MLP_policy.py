@@ -1,3 +1,4 @@
+from _typeshed import ReadableBuffer
 import abc
 import itertools
 from torch import nn
@@ -138,7 +139,8 @@ class MLPPolicySL(MLPPolicy):
         expert actions under the policy.
         Hint: look at the documentation for torch.distributions 
         """
-        loss = None
+        action_distribution = self(observations)
+        loss = -action_distribution.log_prob(actions).mean()
         """
         END CODE
         """
