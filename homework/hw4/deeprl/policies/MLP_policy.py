@@ -139,9 +139,6 @@ class MLPPolicySL(MLPPolicy):
         Hint: look at the documentation for torch.distributions 
         """
         action_distribution = self(observations)
-        #print(observations)
-        print(actions)
-        #print(action_distribution)
         loss = -action_distribution.log_prob(actions).mean()
         """
         END CODE
